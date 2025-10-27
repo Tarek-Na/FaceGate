@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University of Balamand - Access Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/typed.js/2.0.12/typed.min.js"></script>
+    <script src="https://unpkg.com/splitting@1.0.6/dist/splitting.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/splitting@1.0.6/dist/splitting.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Sans+Pro:wght@300;400;600&display=swap');
+        
+        :root {
+            --primary-blue: #1e3a8a;
+            --secondary-gray: #475569;
+            --accent-amber: #f59e0b;
+            --success-green: #059669;
+            --error-red: #dc2626;
+            --bg-ivory: #fefdf8;
+            --uob-gold: #d4af37;
+            --uob-blue: #003366;
+        }
+        
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background: var(--bg-ivory);
+            overflow-x: hidden;
+        }
+        
+        .display-font {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .hero-bg {
+            background: linear-gradient(135deg, var(--uob-blue) 0%, var(--primary-blue) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        #particle-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        
+        .content-overlay {
+            position: relative;
+            z-index: 2;
+        }
+        
+        .chat-bubble {
+            transition: all 0.3s ease;
+        }
+        
+        .status-indicator {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .typing-indicator {
+            animation: typing 1.5s infinite;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% { opacity: 0.3; }
+            30% { opacity: 1; }
+        }
+        
+        .message-enter {
+            animation: slideInUp 0.3s ease-out;
+        }
+        
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .visitor-form {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+        }
+        
+        .visitor-form:focus-within {
+            border-color: var(--uob-blue);
+            box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.1);
+        }
+        
+        .uob-logo {
+            background: linear-gradient(135deg, var(--uob-blue) 0%, var(--uob-gold) 100%);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <div class="w-10 h-10 uob-logo rounded-lg flex items-center justify-center">
+                        <span class="text-white font-bold text-xs">UOB</span>
+                    </div>
+                    <div>
+                        <h1 class="display-font text-lg font-semibold text-gray-900">University of Balamand - Access Assistant</h1>
+                        <p class="text-sm text-gray-500">Koura Campus - Intelligent Access Control</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <div class="text-right">
+                        <div class="text-sm font-medium text-gray-900" id="current-time">--:-- --</div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full status-indicator"></div>
+                            <span class="text-xs text-gray-500">AI Assistant Online</span>
+                        </div>
+                    </div>
+                    <a href="help.html" class="text-sm font-medium text-gray-700 hover:text-blue-600 transition-colors flex items-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <span>Help</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero-bg h-32 relative">
+        <div id="particle-container"></div>
+        <div class="content-overlay h-full flex items-center justify-center">
+            <div class="text-center text-white">
+                <h2 class="display-font text-2xl font-bold mb-2">
+                    <span id="typed-welcome"></span>
+                </h2>
+                <p class="text-blue-100 text-sm">Welcome to University of Balamand Koura Campus</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Chat Interface -->
+            <div class="lg:col-span-2 space-y-4">
+                <!-- Chat Window -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden flex flex-col">
+                    <div class="bg-gradient-to-r from-blue-600 to-blue-700 px-4 py-3">
+                        <h3 class="display-font text-white font-semibold flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                            AI Access Assistant
+                        </h3>
+                    </div>
+                    
+                    <div class="flex-1 h-96 overflow-y-auto p-4 space-y-3" id="chat-messages">
+                        <!-- Welcome Message -->
+                        <div class="w-full flex justify-start mb-3">
+                            <div class="chat-bubble p-0 rounded-lg message-enter max-w-[85%]">
+                                <div class="flex items-start space-x-3">
+                                    <div class="w-8 h-8 bg-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
+                                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>
+                                    </div>
+                                    <div class="flex-1 bg-gray-50 p-3 rounded-lg">
+                                        <p class="text-sm text-gray-800">Welcome to University of Balamand Koura Campus! I'm your AI Access Assistant. How can I help you today?</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- User Input Form -->
+                    <div class="border-t border-gray-200 p-4 bg-gray-50">
+                        <form id="chat-form" class="flex items-center space-x-3">
+                            <input type="text" id="chat-input" placeholder="Ask me anything about UOB..." class="flex-1 w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-shadow" autocomplete="off">
+                            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white p-2 rounded-full font-semibold transition-colors flex items-center justify-center h-10 w-10 flex-shrink-0">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"></path></svg>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- AI Status -->
+                <div class="bg-white rounded-xl shadow-lg p-4">
+                    <h3 class="display-font font-semibold text-gray-900 mb-3 flex items-center">
+                        <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                        </svg>
+                        AI Assistant Status
+                    </h3>
+                    <div class="grid grid-cols-3 gap-4">
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-green-600" id="ai-confidence">98%</div>
+                            <div class="text-xs text-gray-500">AI Confidence</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-blue-600" id="response-time">1.2s</div>
+                            <div class="text-xs text-gray-500">Response Time</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-2xl font-bold text-amber-600" id="queries-today">247</div>
+                            <div class="text-xs text-gray-500">Queries Today</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="space-y-4">
+                <!-- Quick Actions -->
+                <div class="bg-white rounded-xl shadow-lg p-4">
+                    <h3 class="display-font font-semibold text-gray-900 mb-4">Quick Actions</h3>
+                    <div class="space-y-2">
+                        <button class="block w-full text-left px-4 py-3 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg transition-colors" onclick="startVisitorRequest()">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
+                                </svg>
+                                Submit Visitor Request
+                            </div>
+                        </button>
+                        <button class="block w-full text-left px-4 py-3 bg-green-50 hover:bg-green-100 text-green-700 rounded-lg transition-colors" onclick="getCampusMap()">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path>
+                                </svg>
+                                Campus Map
+                            </div>
+                        </button>
+                        <button class="block w-full text-left px-4 py-3 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg transition-colors" onclick="checkVisitorStatus()">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                                Check Request Status
+                            </div>
+                        </button>
+                        <button class="block w-full text-left px-4 py-3 bg-red-50 hover:bg-red-100 text-red-700 rounded-lg transition-colors" onclick="handleEmergency()">
+                            <div class="flex items-center">
+                                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                                </svg>
+                                Emergency Contact
+                            </div>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Campus Info -->
+                <div class="bg-white rounded-xl shadow-lg p-4">
+                    <h3 class="display-font font-semibold text-gray-900 mb-4">Campus Information</h3>
+                    <div class="space-y-3 text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Current Time:</span>
+                            <span class="font-medium" id="campus-time">--:-- --</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Weather:</span>
+                            <span class="font-medium">22°C, Clear</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Security:</span>
+                            <span class="font-medium text-green-600">Active</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-gray-600">Visitors Today:</span>
+                            <span class="font-medium" id="visitor-count">156</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Visitor Request Modal -->
+    <div id="visitor-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-semibold text-gray-900">Visitor Request Form</h3>
+                <button onclick="closeVisitorModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="visitor-form" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Full Name *</label>
+                    <input type="text" id="visitor-name" class="visitor-form w-full px-4 py-3 rounded-lg focus:outline-none" placeholder="Enter your full name" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">ID Number *</label>
+                    <input type="text" id="visitor-id" class="visitor-form w-full px-4 py-3 rounded-lg focus:outline-none" placeholder="Enter your ID/passport number" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                    <input type="tel" id="visitor-phone" class="visitor-form w-full px-4 py-3 rounded-lg focus:outline-none" placeholder="Enter your phone number" required>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Purpose of Visit *</label>
+                    <select id="visit-purpose" class="visitor-form w-full px-4 py-3 rounded-lg focus:outline-none" required>
+                        <option value="">Select purpose...</option>
+                        <option value="academic-meeting">Academic Meeting</option>
+                        <option value="administrative">Administrative</option>
+                        <option value="student-visit">Student Visit</option>
+                        <option value="tour">Campus Tour</option>
+                        <option value="conference">Conference/Event</option>
+                        <option value="library">Library Access</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Person/Department to Visit</label>
+                    <input type="text" id="visit-person" class="visitor-form w-full px-4 py-3 rounded-lg focus:outline-none" placeholder="Enter name or department">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Building (if known)</label>
+                    <select id="visit-building" class="visitor-form w-full px-4 py-3 rounded-lg focus:outline-none">
+                        <option value="">Select building...</option>
+                        <option value="main-building">Main Building</option>
+                        <option value="library">Library</option>
+                        <option value="engineering">Engineering Building</option>
+                        <option value="business">Business Building</option>
+                        <option value="sciences">Sciences Building</option>
+                        <option value="dorms">Student Dormitories</option>
+                        <option value="sports">Sports Complex</option>
+                        <option value="medical">Medical Center</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Expected Duration</label>
+                    <select id="visit-duration" class="visitor-form w-full px-4 py-3 rounded-lg focus:outline-none">
+                        <option value="1-2">1-2 hours</option>
+                        <option value="half-day">Half day</option>
+                        <option value="full-day">Full day</option>
+                        <option value="multiple">Multiple days</option>
+                    </select>
+                </div>
+                
+                <div class="flex space-x-4 pt-4">
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-700 transition-colors">
+                        Submit Request
+                    </button>
+                    <button type="button" onclick="closeVisitorModal()" class="flex-1 bg-gray-200 text-gray-800 py-3 px-4 rounded-lg font-semibold hover:bg-gray-300 transition-colors">
+                        Cancel
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-12">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="text-center text-sm text-gray-500">
+                <p>&copy; 2025 University of Balamand. Koura Campus Access Control System.</p>
+                <p class="mt-1">Powered by AI Technology for enhanced campus security and visitor management.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="main.js"></script>
+</body>
+</html>

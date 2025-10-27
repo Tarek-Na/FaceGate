@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Status - University Access Control</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.0/echarts.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Source+Sans+Pro:wght@300;400;600&display=swap');
+        
+        :root {
+            --primary-blue: #1e3a8a;
+            --secondary-gray: #475569;
+            --accent-amber: #f59e0b;
+            --success-green: #059669;
+            --error-red: #dc2626;
+            --bg-ivory: #fefdf8;
+        }
+        
+        body {
+            font-family: 'Source Sans Pro', sans-serif;
+            background: var(--bg-ivory);
+        }
+        
+        .display-font {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        .status-card {
+            transition: all 0.3s ease;
+        }
+        
+        .status-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .metric-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 1px solid #e2e8f0;
+        }
+        
+        .camera-feed {
+            background: #000;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .face-overlay {
+            position: absolute;
+            border: 2px solid #10b981;
+            border-radius: 4px;
+            background: rgba(16, 185, 129, 0.1);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+        
+        .progress-ring {
+            transform: rotate(-90deg);
+        }
+        
+        .progress-ring-circle {
+            transition: stroke-dashoffset 0.35s;
+            transform-origin: 50% 50%;
+        }
+        
+        .activity-item {
+            animation: slideInLeft 0.4s ease-out;
+        }
+        
+        @keyframes slideInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-4">
+                    <a href="index.html" class="flex items-center space-x-4">
+                        <div class="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h1 class="display-font text-lg font-semibold text-gray-900">System Status Dashboard</h1>
+                            <p class="text-sm text-gray-500">Real-time Monitoring</p>
+                        </div>
+                    </a>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <div class="text-right">
+                        <div class="text-sm font-medium text-gray-900" id="current-time">--:-- --</div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                            <span class="text-xs text-gray-500">Live Monitoring</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-6">
+        <!-- Live Camera Feed -->
+        <div class="mb-6">
+            <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                <div class="bg-gradient-to-r from-gray-800 to-gray-900 px-4 py-3">
+                    <h2 class="display-font text-white font-semibold flex items-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                        </svg>
+                        Live Camera Feed - Main Gate
+                    </h2>
+                </div>
+                <div class="camera-feed aspect-video relative">
+                    <img src="resources/recognition-demo.jpg" alt="Camera Feed" class="w-full h-full object-cover">
+                    <!-- Simulated face detection overlays -->
+                    <div class="face-overlay" style="top: 30%; left: 20%; width: 80px; height: 100px;"></div>
+                    <div class="face-overlay" style="top: 50%; left: 60%; width: 75px; height: 95px; animation-delay: 1s;"></div>
+                    <div class="absolute top-4 left-4 bg-black bg-opacity-75 text-white px-3 py-2 rounded-lg text-sm">
+                        <div>🔴 REC 12:34:56</div>
+                        <div>📡 Signal: Strong</div>
+                    </div>
+                    <div class="absolute top-4 right-4 bg-black bg-opacity-75 text-white px-3 py-2 rounded-lg text-sm">
+                        <div>👥 Detected: 2 faces</div>
+                        <div>🎯 Confidence: 94%</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Metrics -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div class="metric-card status-card rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Access Today</p>
+                        <p class="text-3xl font-bold text-blue-600" id="total-access-metric">1,247</p>
+                        <p class="text-xs text-green-600">↗ +12% from yesterday</p>
+                    </div>
+                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-card status-card rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Success Rate</p>
+                        <p class="text-3xl font-bold text-green-600" id="success-rate-metric">98.7%</p>
+                        <p class="text-xs text-green-600">↗ +0.2% improvement</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-card status-card rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Avg Response Time</p>
+                        <p class="text-3xl font-bold text-amber-600" id="response-time-metric">1.2s</p>
+                        <p class="text-xs text-green-600">↗ 15% faster</p>
+                    </div>
+                    <div class="w-12 h-12 bg-amber-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <div class="metric-card status-card rounded-xl p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">System Health</p>
+                        <p class="text-3xl font-bold text-green-600">Excellent</p>
+                        <p class="text-xs text-green-600">All systems operational</p>
+                    </div>
+                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
+                        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.031 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts and Activity -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+            <!-- Access Trend Chart -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="display-font text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path>
+                    </svg>
+                    Access Trends - Last 24 Hours
+                </h3>
+                <div id="access-chart" style="height: 300px;"></div>
+            </div>
+
+            <!-- System Performance -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="display-font text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                    <svg class="w-5 h-5 mr-2 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                    </svg>
+                    System Performance
+                </h3>
+                <div id="performance-chart" style="height: 300px;"></div>
+            </div>
+        </div>
+
+        <!-- System Health Grid -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <!-- Camera Status -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="display-font text-lg font-semibold text-gray-900 mb-4">Camera Systems</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Main Gate Camera</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span class="text-xs text-green-600">Online</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Side Entrance Camera</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span class="text-xs text-green-600">Online</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Backup Camera</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-amber-500 rounded-full"></div>
+                            <span class="text-xs text-amber-600">Standby</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Database Status -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="display-font text-lg font-semibold text-gray-900 mb-4">Database Systems</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Student Database</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span class="text-xs text-green-600">Synced</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Staff Database</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span class="text-xs text-green-600">Synced</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Visitor Database</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span class="text-xs text-green-600">Synced</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Network Status -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h3 class="display-font text-lg font-semibold text-gray-900 mb-4">Network Status</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Campus Network</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span class="text-xs text-green-600">Optimal</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Internet Connection</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span class="text-xs text-green-600">Stable</span>
+                        </div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-600">Cloud Services</span>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                            <span class="text-xs text-green-600">Connected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity Timeline -->
+        <div class="bg-white rounded-xl shadow-lg p-6">
+            <h3 class="display-font text-lg font-semibold text-gray-900 mb-4 flex items-center">
+                <svg class="w-5 h-5 mr-2 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                </svg>
+                Recent Activity Log
+            </h3>
+            <div class="space-y-3" id="activity-timeline">
+                <!-- Activity items will be populated by JavaScript -->
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-200 mt-12">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <div class="text-center text-sm text-gray-500">
+                <p>&copy; 2025 University Security Systems. Real-time monitoring and analytics.</p>
+                <p class="mt-1">System Status Dashboard v2.1.0</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize status dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeCharts();
+            updateTime();
+            generateActivityTimeline();
+            startRealTimeUpdates();
+            
+            // Update time every second
+            setInterval(updateTime, 1000);
+        });
+
+        function updateTime() {
+            const now = new Date();
+            const timeString = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+            document.getElementById('current-time').textContent = timeString;
+        }
+
+        function initializeCharts() {
+            // Access Trend Chart
+            const accessChart = echarts.init(document.getElementById('access-chart'));
+            const accessOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: {
+                    type: 'category',
+                    data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
+                    axisLine: {
+                        lineStyle: {
+                            color: '#e2e8f0'
+                        }
+                    }
+                },
+                yAxis: {
+                    type: 'value',
+                    axisLine: {
+                        lineStyle: {
+                            color: '#e2e8f0'
+                        }
+                    }
+                },
+                series: [
+                    {
+                        name: 'Access Granted',
+                        type: 'line',
+                        data: [45, 23, 156, 289, 234, 189, 67],
+                        smooth: true,
+                        lineStyle: {
+                            color: '#059669',
+                            width: 3
+                        },
+                        areaStyle: {
+                            color: {
+                                type: 'linear',
+                                x: 0,
+                                y: 0,
+                                x2: 0,
+                                y2: 1,
+                                colorStops: [{
+                                    offset: 0, color: 'rgba(5, 150, 105, 0.3)'
+                                }, {
+                                    offset: 1, color: 'rgba(5, 150, 105, 0.05)'
+                                }]
+                            }
+                        }
+                    },
+                    {
+                        name: 'Access Denied',
+                        type: 'line',
+                        data: [12, 8, 34, 67, 45, 23, 15],
+                        smooth: true,
+                        lineStyle: {
+                            color: '#dc2626',
+                            width: 2
+                        }
+                    }
+                ]
+            };
+            accessChart.setOption(accessOption);
+
+            // Performance Chart
+            const performanceChart = echarts.init(document.getElementById('performance-chart'));
+            const performanceOption = {
+                tooltip: {
+                    trigger: 'axis',
+                    formatter: '{b}: {c}%'
+                },
+                series: [
+                    {
+                        type: 'gauge',
+                        startAngle: 180,
+                        endAngle: 0,
+                        min: 0,
+                        max: 100,
+                        splitNumber: 10,
+                        itemStyle: {
+                            color: '#059669'
+                        },
+                        progress: {
+                            show: true,
+                            width: 30
+                        },
+                        pointer: {
+                            show: false
+                        },
+                        axisLine: {
+                            lineStyle: {
+                                width: 30,
+                                color: [
+                                    [0.3, '#dc2626'],
+                                    [0.7, '#f59e0b'],
+                                    [1, '#059669']
+                                ]
+                            }
+                        },
+                        axisTick: {
+                            distance: -45,
+                            splitNumber: 5,
+                            lineStyle: {
+                                width: 2,
+                                color: '#999'
+                            }
+                        },
+                        splitLine: {
+                            distance: -52,
+                            length: 14,
+                            lineStyle: {
+                                width: 3,
+                                color: '#999'
+                            }
+                        },
+                        axisLabel: {
+                            distance: -20,
+                            color: '#999',
+                            fontSize: 12
+                        },
+                        detail: {
+                            valueAnimation: true,
+                            width: '60%',
+                            lineHeight: 40,
+                            borderRadius: 8,
+                            offsetCenter: [0, '-15%'],
+                            fontSize: 24,
+                            fontWeight: 'bold',
+                            formatter: '{value}%',
+                            color: '#059669'
+                        },
+                        data: [
+                            {
+                                value: 98.7,
+                                name: 'System Performance'
+                            }
+                        ]
+                    }
+                ]
+            };
+            performanceChart.setOption(performanceOption);
+
+            // Make charts responsive
+            window.addEventListener('resize', function() {
+                accessChart.resize();
+                performanceChart.resize();
+            });
+        }
+
+        function generateActivityTimeline() {
+            const activities = [
+                { time: '2 minutes ago', user: 'Sarah Johnson', action: 'Access Granted', location: 'Main Gate', confidence: '98%', status: 'success' },
+                { time: '3 minutes ago', user: 'Mike Chen', action: 'Access Granted', location: 'Main Gate', confidence: '96%', status: 'success' },
+                { time: '5 minutes ago', user: 'Unknown Visitor', action: 'Access Denied', location: 'Main Gate', confidence: '23%', status: 'error' },
+                { time: '7 minutes ago', user: 'Dr. Emily Rodriguez', action: 'Access Granted', location: 'Main Gate', confidence: '99%', status: 'success' },
+                { time: '10 minutes ago', user: 'Alex Thompson', action: 'Access Granted', location: 'Side Entrance', confidence: '94%', status: 'success' },
+                { time: '12 minutes ago', user: 'Lisa Wang', action: 'Access Granted', location: 'Main Gate', confidence: '97%', status: 'success' },
+                { time: '15 minutes ago', user: 'Security Override', action: 'Manual Override', location: 'Main Gate', confidence: 'N/A', status: 'warning' }
+            ];
+
+            const container = document.getElementById('activity-timeline');
+            container.innerHTML = '';
+
+            activities.forEach((activity, index) => {
+                const activityElement = document.createElement('div');
+                activityElement.className = 'activity-item flex items-center justify-between p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition-colors';
+                
+                const statusColor = activity.status === 'success' ? 'text-green-600' : 
+                                  activity.status === 'error' ? 'text-red-600' : 'text-amber-600';
+                const statusIcon = activity.status === 'success' ? '✓' : 
+                                 activity.status === 'error' ? '✗' : '⚠';
+
+                activityElement.innerHTML = `
+                    <div class="flex-1">
+                        <div class="flex items-center space-x-2">
+                            <span class="font-medium text-gray-900">${activity.user}</span>
+                            <span class="text-sm ${statusColor} font-semibold">${statusIcon}</span>
+                        </div>
+                        <div class="text-sm text-gray-600">${activity.action} • ${activity.location}</div>
+                        <div class="text-xs text-gray-500">${activity.time} • Confidence: ${activity.confidence}</div>
+                    </div>
+                `;
+
+                container.appendChild(activityElement);
+            });
+        }
+
+        function startRealTimeUpdates() {
+            // Simulate real-time metric updates
+            setInterval(() => {
+                updateMetrics();
+                if (Math.random() > 0.8) {
+                    addNewActivity();
+                }
+            }, 5000);
+        }
+
+        function updateMetrics() {
+            // Simulate metric changes
+            const totalAccess = document.getElementById('total-access-metric');
+            const currentValue = parseInt(totalAccess.textContent.replace(',', ''));
+            const newValue = currentValue + Math.floor(Math.random() * 5);
+            
+            anime({
+                targets: totalAccess,
+                innerHTML: [currentValue, newValue],
+                duration: 1000,
+                round: 1,
+                easing: 'easeOutQuart'
+            });
+
+            // Update success rate with small variations
+            const successRate = document.getElementById('success-rate-metric');
+            const currentRate = parseFloat(successRate.textContent);
+            const newRate = Math.max(95, Math.min(99.9, currentRate + (Math.random() - 0.5) * 0.1));
+            successRate.textContent = newRate.toFixed(1) + '%';
+        }
+
+        function addNewActivity() {
+            const users = ['John Doe', 'Jane Smith', 'Robert Johnson', 'Maria Garcia', 'David Wilson'];
+            const actions = ['Access Granted', 'Access Granted', 'Access Granted', 'Access Denied'];
+            const locations = ['Main Gate', 'Side Entrance', 'Main Gate', 'Main Gate'];
+            
+            const randomUser = users[Math.floor(Math.random() * users.length)];
+            const randomAction = actions[Math.floor(Math.random() * actions.length)];
+            const randomLocation = locations[Math.floor(Math.random() * locations.length)];
+            const randomConfidence = Math.floor(Math.random() * 20) + 80;
+            
+            const container = document.getElementById('activity-timeline');
+            const newActivity = document.createElement('div');
+            newActivity.className = 'activity-item flex items-center justify-between p-3 rounded-lg bg-blue-50 border border-blue-200';
+            
+            const isSuccess = randomAction === 'Access Granted';
+            const statusColor = isSuccess ? 'text-green-600' : 'text-red-600';
+            const statusIcon = isSuccess ? '✓' : '✗';
+            
+            newActivity.innerHTML = `
+                <div class="flex-1">
+                    <div class="flex items-center space-x-2">
+                        <span class="font-medium text-gray-900">${randomUser}</span>
+                        <span class="text-sm ${statusColor} font-semibold">${statusIcon}</span>
+                    </div>
+                    <div class="text-sm text-gray-600">${randomAction} • ${randomLocation}</div>
+                    <div class="text-xs text-gray-500">Just now • Confidence: ${randomConfidence}%</div>
+                </div>
+            `;
+            
+            container.insertBefore(newActivity, container.firstChild);
+            
+            // Animate new activity
+            anime({
+                targets: newActivity,
+                scale: [0.8, 1],
+                opacity: [0, 1],
+                duration: 400,
+                easing: 'easeOutBack'
+            });
+            
+            // Remove oldest activity if more than 10
+            if (container.children.length > 10) {
+                container.removeChild(container.lastChild);
+            }
+        }
+    </script>
+</body>
+</html>
