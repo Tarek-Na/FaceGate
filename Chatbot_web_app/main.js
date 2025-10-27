@@ -7,7 +7,7 @@ const OLLAMA_MODEL_NAME = "qwen:0.5B"; // This is now the FALLBACK model
 
 // --- NEW: Gemini API Configuration ---
 // !! IMPORTANT !! Replace "YOUR_GEMINI_API_KEY_HERE" with your actual Google AI Studio API key
-const GEMINI_API_KEY = "AIzaSyDRaTW5TnWi3yJBYuE8Du37uFMf1M100lw";
+const GEMINI_API_KEY = "YOUR_GEMINI_API_KEY_HERE";
 const GEMINI_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
 
 // --- NEW: Chat History Configuration ---
