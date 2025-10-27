@@ -108,13 +108,14 @@
     </style>
 </head>
 <body class="min-h-screen">
-    <!-- Navigation -->
     <nav class="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center space-x-4">
-                    <div class="w-10 h-10 uob-logo rounded-lg flex items-center justify-center">
-                        <span class="text-white font-bold text-xs">UOB</span>
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
+                        <img src="https://upload.wikimedia.org/wikipedia/en/thumb/8/85/University_of_Balamand_logo.svg/250px-University_of_Balamand_logo.svg.png" 
+                            alt="University of Balamand Logo" 
+                            class="w-full h-full object-cover">
                     </div>
                     <div>
                         <h1 class="display-font text-lg font-semibold text-gray-900">University of Balamand - Access Assistant</h1>
@@ -133,11 +134,14 @@
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                         <span>Help</span>
                     </a>
+                    <a href="security.html" target="_blank" class="text-sm font-medium text-gray-700 hover:text-red-600 transition-colors flex items-center space-x-2">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                        <span>Security</span>
+                    </a>
                 </div>
             </div>
         </div>
     </nav>
-
     <!-- Hero Section -->
     <section class="hero-bg h-32 relative">
         <div id="particle-container"></div>
@@ -305,8 +309,8 @@
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">ID Number *</label>
-                    <input type="text" id="visitor-id" class="visitor-form w-full px-4 py-3 rounded-lg focus:outline-none" placeholder="Enter your ID/passport number" required>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">ID Number (Optional)</label>
+                    <input type="text" id="visitor-id" class="visitor-form w-full px-4 py-3 rounded-lg focus:outline-none" placeholder="Enter your ID/passport number (if available)">
                 </div>
                 
                 <div>
@@ -380,6 +384,11 @@
         </div>
     </footer>
 
-    <script src="main.js"></script>
+    <script src="js/config.js"></script>
+    <script src="js/state.js"></script>
+    <script src="js/ai-service.js"></script>
+    <script src="js/visitor-system.js"></script>
+    <script src="js/ui-components.js"></script>
+    <script src="js/main.js"></script>
 </body>
 </html>

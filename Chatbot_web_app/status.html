@@ -137,7 +137,7 @@
                     <div class="face-overlay" style="top: 30%; left: 20%; width: 80px; height: 100px;"></div>
                     <div class="face-overlay" style="top: 50%; left: 60%; width: 75px; height: 95px; animation-delay: 1s;"></div>
                     <div class="absolute top-4 left-4 bg-black bg-opacity-75 text-white px-3 py-2 rounded-lg text-sm">
-                        <div>🔴 REC 12:34:56</div>
+                        <div>🔴 REC <span id="camera-time">12:34:56</span></div>
                         <div>📡 Signal: Strong</div>
                     </div>
                     <div class="absolute top-4 right-4 bg-black bg-opacity-75 text-white px-3 py-2 rounded-lg text-sm">
@@ -368,6 +368,7 @@
                 hour12: true
             });
             document.getElementById('current-time').textContent = timeString;
+            document.getElementById('camera-time').textContent = timeString;
         }
 
         function initializeCharts() {
@@ -376,9 +377,7 @@
             const accessOption = {
                 tooltip: {
                     trigger: 'axis',
-                    axisPointer: {
-                        type: 'cross'
-                    }
+                    axisPointer: { type: 'cross' }
                 },
                 grid: {
                     left: '3%',
@@ -389,19 +388,11 @@
                 xAxis: {
                     type: 'category',
                     data: ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', '24:00'],
-                    axisLine: {
-                        lineStyle: {
-                            color: '#e2e8f0'
-                        }
-                    }
+                    axisLine: { lineStyle: { color: '#e2e8f0' } }
                 },
                 yAxis: {
                     type: 'value',
-                    axisLine: {
-                        lineStyle: {
-                            color: '#e2e8f0'
-                        }
-                    }
+                    axisLine: { lineStyle: { color: '#e2e8f0' } }
                 },
                 series: [
                     {
@@ -409,22 +400,15 @@
                         type: 'line',
                         data: [45, 23, 156, 289, 234, 189, 67],
                         smooth: true,
-                        lineStyle: {
-                            color: '#059669',
-                            width: 3
-                        },
+                        lineStyle: { color: '#059669', width: 3 },
                         areaStyle: {
                             color: {
                                 type: 'linear',
-                                x: 0,
-                                y: 0,
-                                x2: 0,
-                                y2: 1,
-                                colorStops: [{
-                                    offset: 0, color: 'rgba(5, 150, 105, 0.3)'
-                                }, {
-                                    offset: 1, color: 'rgba(5, 150, 105, 0.05)'
-                                }]
+                                x: 0, y: 0, x2: 0, y2: 1,
+                                colorStops: [
+                                    { offset: 0, color: 'rgba(5, 150, 105, 0.3)' },
+                                    { offset: 1, color: 'rgba(5, 150, 105, 0.05)' }
+                                ]
                             }
                         }
                     },
@@ -433,10 +417,7 @@
                         type: 'line',
                         data: [12, 8, 34, 67, 45, 23, 15],
                         smooth: true,
-                        lineStyle: {
-                            color: '#dc2626',
-                            width: 2
-                        }
+                        lineStyle: { color: '#dc2626', width: 2 }
                     }
                 ]
             };
@@ -457,16 +438,9 @@
                         min: 0,
                         max: 100,
                         splitNumber: 10,
-                        itemStyle: {
-                            color: '#059669'
-                        },
-                        progress: {
-                            show: true,
-                            width: 30
-                        },
-                        pointer: {
-                            show: false
-                        },
+                        itemStyle: { color: '#059669' },
+                        progress: { show: true, width: 30 },
+                        pointer: { show: false },
                         axisLine: {
                             lineStyle: {
                                 width: 30,
@@ -480,18 +454,12 @@
                         axisTick: {
                             distance: -45,
                             splitNumber: 5,
-                            lineStyle: {
-                                width: 2,
-                                color: '#999'
-                            }
+                            lineStyle: { width: 2, color: '#999' }
                         },
                         splitLine: {
                             distance: -52,
                             length: 14,
-                            lineStyle: {
-                                width: 3,
-                                color: '#999'
-                            }
+                            lineStyle: { width: 3, color: '#999' }
                         },
                         axisLabel: {
                             distance: -20,
@@ -509,12 +477,7 @@
                             formatter: '{value}%',
                             color: '#059669'
                         },
-                        data: [
-                            {
-                                value: 98.7,
-                                name: 'System Performance'
-                            }
-                        ]
+                        data: [{ value: 98.7, name: 'System Performance' }]
                     }
                 ]
             };
@@ -581,13 +544,17 @@
             const currentValue = parseInt(totalAccess.textContent.replace(',', ''));
             const newValue = currentValue + Math.floor(Math.random() * 5);
             
-            anime({
-                targets: totalAccess,
-                innerHTML: [currentValue, newValue],
-                duration: 1000,
-                round: 1,
-                easing: 'easeOutQuart'
-            });
+            if (typeof anime !== 'undefined') {
+                anime({
+                    targets: totalAccess,
+                    innerHTML: [currentValue, newValue],
+                    duration: 1000,
+                    round: 1,
+                    easing: 'easeOutQuart'
+                });
+            } else {
+                totalAccess.textContent = newValue.toLocaleString();
+            }
 
             // Update success rate with small variations
             const successRate = document.getElementById('success-rate-metric');
@@ -628,13 +595,15 @@
             container.insertBefore(newActivity, container.firstChild);
             
             // Animate new activity
-            anime({
-                targets: newActivity,
-                scale: [0.8, 1],
-                opacity: [0, 1],
-                duration: 400,
-                easing: 'easeOutBack'
-            });
+            if (typeof anime !== 'undefined') {
+                anime({
+                    targets: newActivity,
+                    scale: [0.8, 1],
+                    opacity: [0, 1],
+                    duration: 400,
+                    easing: 'easeOutBack'
+                });
+            }
             
             // Remove oldest activity if more than 10
             if (container.children.length > 10) {
